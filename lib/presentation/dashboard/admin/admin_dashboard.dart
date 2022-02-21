@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:quiz_app/app/bloc/authentication_bloc.dart';
+import 'package:quiz_app/app/bloc/authentication_event.dart';
 import 'package:quiz_app/presentation/dashboard/admin/leaderboards/leaderboards.dart';
 import 'package:quiz_app/presentation/dashboard/admin/quiz/create.dart';
 import 'package:quiz_app/presentation/dashboard/admin/quiz/quizes.dart';
+import 'package:quiz_app/presentation/widgets/custom_button.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({Key? key}) : super(key: key);
@@ -69,6 +73,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
             TextButton(
               onPressed: () => showModalBottomSheet(
                 isScrollControlled: true,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                  ),
+                ),
                 context: context,
                 builder: (context) {
                   return Container(
@@ -87,6 +97,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         ),
                         Text(
                           'Name: $user',
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          child: CustomButton(
+                            onTap: () => context
+                                .read<AuthenticationBloc>()
+                                .add(AuthenticationLogoutRequested()),
+                            text: 'Sign out',
+                          ),
                         )
                       ],
                     ),

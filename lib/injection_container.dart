@@ -12,6 +12,9 @@ import 'package:quiz_app/presentation/authentication/bloc/register/register_bloc
 import 'package:quiz_app/presentation/dashboard/admin/leaderboards/cubit/leaderboards_cubit.dart';
 import 'package:quiz_app/presentation/dashboard/admin/quiz/bloc/create/create_quiz_bloc.dart';
 import 'package:quiz_app/presentation/dashboard/admin/quiz/bloc/quiz_bloc.dart';
+import 'package:quiz_app/presentation/dashboard/user/profile/bloc/user_cubit.dart';
+import 'package:quiz_app/presentation/dashboard/user/quiz/bloc/answer/answer_quiz_bloc.dart';
+import 'package:quiz_app/presentation/dashboard/user/quiz/bloc/quiz_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -53,4 +56,10 @@ void setup() {
 
   getIt.registerFactory<LeaderboardsCubit>(
       () => LeaderboardsCubit(quizApi: getIt()));
+
+  getIt.registerFactory<QuizUserBloc>(() => QuizUserBloc(quizApi: getIt()));
+
+  getIt.registerFactory<UserCubit>(() => UserCubit(quizApi: getIt()));
+
+  getIt.registerFactory<AnswerQuizBloc>(() => AnswerQuizBloc(quizApi: getIt()));
 }

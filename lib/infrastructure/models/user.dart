@@ -9,7 +9,8 @@ class User {
     required this.id,
     required this.name,
     required this.email,
-    required this.quizzes,
+    required this.isAdmin,
+    this.quizzes,
     this.points,
   });
 
@@ -18,6 +19,8 @@ class User {
   final int id;
   final String name;
   final String email;
+  @JsonKey(name: 'is_admin')
+  final bool isAdmin;
   final int? points;
   final List<Quiz>? quizzes;
 }

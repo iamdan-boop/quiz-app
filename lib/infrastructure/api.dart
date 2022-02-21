@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:quiz_app/domain/constants.dart';
 import 'package:quiz_app/domain/models/question_domain.dart';
 import 'package:quiz_app/infrastructure/models/auth_token.dart';
@@ -29,6 +28,9 @@ abstract class QuizApi {
     @Field('password') required String password,
   });
 
+  @POST('/me')
+  Future<AuthToken> me();
+
   @GET('/quiz')
   Future<List<Quiz>> getQuizzes();
 
@@ -44,6 +46,19 @@ abstract class QuizApi {
     @Path('quiz') required int quizId,
   });
 
+  // User Quiz
+  @GET('/user/quiz')
+  Future<List<Quiz>> getUserQuizzes();
+
+  @GET('/user/current-quizzes')
+  Future<List<Quiz>> getCurrentQuizzes();
+
   @GET('/leaderboards')
   Future<List<User>> getLeaderboards();
+
+  @POST('/answer-quiz')
+  Future<void> submitQuizAnswer({
+    @Field('quiz') required int quizId,
+    @Field('answers') required List<int> answers,
+  });
 }

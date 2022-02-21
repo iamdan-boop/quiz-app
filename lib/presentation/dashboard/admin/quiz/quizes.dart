@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:quiz_app/infrastructure/models/quiz.dart';
 import 'package:quiz_app/injection_container.dart';
 import 'package:quiz_app/presentation/dashboard/admin/quiz/bloc/quiz_bloc.dart';
@@ -10,10 +11,15 @@ import 'package:quiz_app/presentation/dashboard/admin/quiz/bloc/quiz_state.dart'
 
 import 'dart:math' as math;
 
-class QuizesScreen extends StatelessWidget {
+class QuizesScreen extends StatefulWidget {
   const QuizesScreen({Key? key}) : super(key: key);
 
-// List<Controllers> with each current id to question
+  @override
+  State<QuizesScreen> createState() => _QuizesScreenState();
+}
+
+class _QuizesScreenState extends State<QuizesScreen> {
+  final _refreshController = RefreshController();
 
   @override
   Widget build(BuildContext context) {
@@ -42,18 +48,23 @@ class QuizesScreen extends StatelessWidget {
                 ..showSnackBar(
                     const SnackBar(content: Text('Something went wrong')));
             }
+            if (state.submissionStatus.isSubmissionSuccess) {
+              _refreshController.refreshCompleted();
+            }
           },
           builder: (context, state) {
-            if (state.submissionStatus.isSubmissionInProgress) {
-              return const Center(child: CircularProgressIndicator());
-            }
             if (state.submissionStatus.isSubmissionFailure) {
               return const Center(
                 child: Text("Could'nt get the quizzes"),
               );
             }
-            if (state.submissionStatus.isSubmissionSuccess) {
-              return ListView.builder(
+
+            return SmartRefresher(
+              controller: _refreshController,
+              header: const WaterDropHeader(),
+              onRefresh: () => context.read<QuizBloc>().add(GetQuizzes()),
+              enablePullDown: true,
+              child: ListView.builder(
                 itemCount: state.quizzes.length,
                 shrinkWrap: true,
                 itemBuilder: (context, index) {
@@ -104,11 +115,7 @@ class QuizesScreen extends StatelessWidget {
                     ),
                   );
                 },
-              );
-            }
-            return const Center(
-              child:
-                  Text('Something went wrong please restart the application'),
+              ),
             );
           },
         ),

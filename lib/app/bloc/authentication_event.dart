@@ -11,13 +11,16 @@ class AuthenticationCheck extends AuthenticationEvent {}
 class AuthenticationStatusChanged extends AuthenticationEvent {
   AuthenticationStatusChanged(
     this.status,
+    this.isAdmin,
   );
 
   final AuthenticationStatus status;
+  final bool isAdmin;
 
   @override
   List<Object> get props => [
         status,
+        isAdmin,
       ];
 }
 

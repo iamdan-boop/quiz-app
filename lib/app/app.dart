@@ -11,11 +11,15 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:quiz_app/app/bloc/authentication_bloc.dart';
+import 'package:quiz_app/app/bloc/authentication_event.dart';
 import 'package:quiz_app/app/bloc/authentication_state.dart';
+import 'package:quiz_app/app/bloc/hydrated/cache_profile_bloc.dart';
+import 'package:quiz_app/app/bloc/hydrated/cached_profile_event.dart';
 import 'package:quiz_app/infrastructure/authentication_repository.dart';
 import 'package:quiz_app/injection_container.dart';
 import 'package:quiz_app/presentation/authentication/sign_in.dart';
 import 'package:quiz_app/presentation/dashboard/admin/admin_dashboard.dart';
+import 'package:quiz_app/presentation/dashboard/user/user_dashboard.dart';
 
 class App extends StatefulWidget {
   const App({Key? key}) : super(key: key);
@@ -27,27 +31,6 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   final _navigatorKey = GlobalKey<NavigatorState>();
   NavigatorState? get _navigator => _navigatorKey.currentState;
-  // bool isLoading = false;
-
-  @override
-  void initState() {
-    getIt<FlutterSecureStorage>().delete(key: 'authToken');
-    // _guestCheck(context);
-    super.initState();
-  }
-
-  // void _guestCheck(BuildContext context) async {
-  //   final guest = await getIt<FlutterSecureStorage>().read(key: 'guest_login');
-  //   if (guest != null && guest.isNotEmpty) {
-  //     guestCheck = guest;
-  //     return;
-  //   }
-  //   final user = await getIt<FlutterSecureStorage>().read(key: 'authToken');
-  //   if (user != null && user.isNotEmpty) {
-  //     await getIt<AuthenticationRepository>().me();
-  //   }
-  //   return;
-  // }
 
   @override
   void dispose() {
@@ -60,8 +43,10 @@ class _AppState extends State<App> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => getIt<AuthenticationBloc>(),
+          create: (context) =>
+              getIt<AuthenticationBloc>()..add(AuthenticationCheck()),
         ),
+        BlocProvider(create: (context) => CacheProfileBloc())
       ],
       child: MaterialApp(
         theme: ThemeData(
@@ -75,12 +60,26 @@ class _AppState extends State<App> {
             listener: (context, state) {
               switch (state.status) {
                 case AuthenticationStatus.authenticated:
-                  _navigator?.pushAndRemoveUntil<void>(
-                    MaterialPageRoute(
-                      builder: (BuildContext context) => const AdminDashboard(),
-                    ),
-                    (route) => false,
-                  );
+                  context.read<CacheProfileBloc>().add(
+                        InsertCacheInfo(isAdmin: state.isAdmin, name: ''),
+                      );
+                  if (state.isAdmin) {
+                    _navigator?.pushAndRemoveUntil<void>(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            const AdminDashboard(),
+                      ),
+                      (route) => false,
+                    );
+                  } else {
+                    _navigator?.pushAndRemoveUntil<void>(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            const UserDashboard(),
+                      ),
+                      (route) => false,
+                    );
+                  }
                   break;
                 case AuthenticationStatus.unauthenticated:
                   _navigator?.pushAndRemoveUntil<void>(
@@ -90,6 +89,17 @@ class _AppState extends State<App> {
                     (route) => false,
                   );
                   break;
+                case AuthenticationStatus.isLoggedIn:
+                  _navigator?.pushAndRemoveUntil<void>(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                    (route) => false,
+                  );
+                  break;
+
                 default:
                   break;
               }

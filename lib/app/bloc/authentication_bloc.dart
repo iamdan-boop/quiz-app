@@ -11,6 +11,7 @@ class AuthenticationBloc
     required AuthenticationRepository authenticationRepository,
   })  : _authenticationRepository = authenticationRepository,
         super(const AuthenticationState.unknown()) {
+    on<AuthenticationCheck>(_authCheck);
     on<AuthenticationLogoutRequested>(
       (event, emit) => _authenticationRepository.logout(),
     );
@@ -20,9 +21,17 @@ class AuthenticationBloc
       add(
         AuthenticationStatusChanged(
           status.authenticationStatus,
+          status.isAdmin,
         ),
       );
     });
+  }
+
+  Future<void> _authCheck(
+    AuthenticationCheck event,
+    Emitter<AuthenticationState> emit,
+  ) async {
+    return await _authenticationRepository.me();
   }
 
   @override
@@ -51,6 +60,7 @@ class AuthenticationBloc
         return emit(
           state.copyWith(
             status: AuthenticationStatus.authenticated,
+            isAdmin: event.isAdmin,
           ),
         );
       // ignore: no_default_cases

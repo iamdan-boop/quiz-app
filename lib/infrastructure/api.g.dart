@@ -8,7 +8,7 @@ part of 'api.dart';
 
 class _QuizApi implements QuizApi {
   _QuizApi(this._dio, {this.baseUrl}) {
-    baseUrl ??= 'http://fced-112-198-225-92.ngrok.io/api';
+    baseUrl ??= 'http://65b7-112-198-205-128.ngrok.io/api';
   }
 
   final Dio _dio;
@@ -42,6 +42,22 @@ class _QuizApi implements QuizApi {
         _setStreamType<AuthToken>(
             Options(method: 'POST', headers: _headers, extra: _extra)
                 .compose(_dio.options, '/register',
+                    queryParameters: queryParameters, data: _data)
+                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = AuthToken.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<AuthToken> me() async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<AuthToken>(
+            Options(method: 'POST', headers: _headers, extra: _extra)
+                .compose(_dio.options, '/me',
                     queryParameters: queryParameters, data: _data)
                 .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     final value = AuthToken.fromJson(_result.data!);
@@ -99,6 +115,40 @@ class _QuizApi implements QuizApi {
   }
 
   @override
+  Future<List<Quiz>> getUserQuizzes() async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<List<dynamic>>(_setStreamType<List<Quiz>>(
+        Options(method: 'GET', headers: _headers, extra: _extra)
+            .compose(_dio.options, '/user/quiz',
+                queryParameters: queryParameters, data: _data)
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    var value = _result.data!
+        .map((dynamic i) => Quiz.fromJson(i as Map<String, dynamic>))
+        .toList();
+    return value;
+  }
+
+  @override
+  Future<List<Quiz>> getCurrentQuizzes() async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<List<dynamic>>(_setStreamType<List<Quiz>>(
+        Options(method: 'GET', headers: _headers, extra: _extra)
+            .compose(_dio.options, '/user/current-quizzes',
+                queryParameters: queryParameters, data: _data)
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    var value = _result.data!
+        .map((dynamic i) => Quiz.fromJson(i as Map<String, dynamic>))
+        .toList();
+    return value;
+  }
+
+  @override
   Future<List<User>> getLeaderboards() async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -113,6 +163,20 @@ class _QuizApi implements QuizApi {
         .map((dynamic i) => User.fromJson(i as Map<String, dynamic>))
         .toList();
     return value;
+  }
+
+  @override
+  Future<void> submitQuizAnswer({required quizId, required answers}) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = {'quiz': quizId, 'answers': answers};
+    await _dio.fetch<void>(_setStreamType<void>(
+        Options(method: 'POST', headers: _headers, extra: _extra)
+            .compose(_dio.options, '/answer-quiz',
+                queryParameters: queryParameters, data: _data)
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    return null;
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {

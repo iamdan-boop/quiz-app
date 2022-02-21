@@ -7,6 +7,7 @@ class AuthToken {
   AuthToken({
     required this.authToken,
     required this.name,
+    required this.isAdmin,
   });
 
   factory AuthToken.fromJson(Map<String, dynamic> json) =>
@@ -14,4 +15,6 @@ class AuthToken {
 
   final String authToken;
   final String name;
+  @JsonKey(name: 'is_admin')
+  final bool isAdmin;
 }

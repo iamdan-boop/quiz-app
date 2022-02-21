@@ -13,11 +13,13 @@ Quiz _$QuizFromJson(Map<String, dynamic> json) => Quiz(
       questions: (json['questions'] as List<dynamic>?)
           ?.map((e) => Question.fromJson(e as Map<String, dynamic>))
           .toList(),
+      points: json['points'] as int?,
     );
 
 Map<String, dynamic> _$QuizToJson(Quiz instance) => <String, dynamic>{
       'id': instance.id,
       'quiz_name': instance.quizName,
       'quiz_description': instance.quizDescription,
+      'points': instance.points,
       'questions': instance.questions,
     };

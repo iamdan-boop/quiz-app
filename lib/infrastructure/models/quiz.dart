@@ -10,6 +10,7 @@ class Quiz {
     required this.quizName,
     required this.quizDescription,
     this.questions,
+    this.points,
   });
 
   factory Quiz.fromJson(Map<String, dynamic> json) => _$QuizFromJson(json);
@@ -19,5 +20,6 @@ class Quiz {
   final String quizName;
   @JsonKey(name: 'quiz_description')
   final String quizDescription;
+  final int? points;
   List<Question>? questions;
 }

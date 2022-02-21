@@ -11,17 +11,18 @@ enum AuthenticationStatus {
   authenticated,
   unauthenticated,
   badRequest,
-  invalid
+  invalid,
+  isLoggedIn,
 }
 
 class AuthenticationStatusState extends Equatable {
-  const AuthenticationStatusState(this.authenticationStatus, this.isGuest);
+  const AuthenticationStatusState(this.authenticationStatus, this.isAdmin);
 
   final AuthenticationStatus authenticationStatus;
-  final bool isGuest;
+  final bool isAdmin;
 
   @override
-  List<Object?> get props => [authenticationStatus, isGuest];
+  List<Object?> get props => [authenticationStatus, isAdmin];
 }
 
 class AuthenticationRepository {
@@ -35,32 +36,31 @@ class AuthenticationRepository {
   Stream<AuthenticationStatusState> get status async* {
     await Future<void>.delayed(const Duration(seconds: 1));
     yield const AuthenticationStatusState(
-      AuthenticationStatus.unauthenticated,
+      AuthenticationStatus.isLoggedIn,
       false,
     );
-
     yield* _controller.stream;
   }
 
-  // Future<void> me() async {
-  //   try {
-  //     final token = await _client.me();
-  //     await _secureStorage.write(key: 'authToken', value: token.authToken);
-  //     return _controller.add(
-  //       const AuthenticationStatusState(
-  //         AuthenticationStatus.authenticated,
-  //         false,
-  //       ),
-  //     );
-  //   } on DioError catch (_) {
-  //     return _controller.add(
-  //       const AuthenticationStatusState(
-  //         AuthenticationStatus.unauthenticated,
-  //         false,
-  //       ),
-  //     );
-  //   }
-  // }
+  Future<void> me() async {
+    try {
+      final token = await _client.me();
+      await _secureStorage.write(key: 'authToken', value: token.authToken);
+      return _controller.add(
+        AuthenticationStatusState(
+          AuthenticationStatus.authenticated,
+          token.isAdmin,
+        ),
+      );
+    } on DioError catch (_) {
+      return _controller.add(
+        const AuthenticationStatusState(
+          AuthenticationStatus.unauthenticated,
+          false,
+        ),
+      );
+    }
+  }
 
   Future<void> login({
     required String email,
@@ -69,10 +69,11 @@ class AuthenticationRepository {
     try {
       final token = await _client.login(email: email, password: password);
       await saveToken(token);
+
       return _controller.add(
-        const AuthenticationStatusState(
+        AuthenticationStatusState(
           AuthenticationStatus.authenticated,
-          false,
+          token.isAdmin,
         ),
       );
     } on DioError catch (e) {
@@ -104,9 +105,9 @@ class AuthenticationRepository {
       );
       await saveToken(token);
       return _controller.add(
-        const AuthenticationStatusState(
+        AuthenticationStatusState(
           AuthenticationStatus.authenticated,
-          false,
+          token.isAdmin,
         ),
       );
     } on DioError catch (e) {
